@@ -41,15 +41,15 @@ class Replica(val arbiter: ActorRef, persistenceProps: Props) extends Actor with
   import context.dispatcher
 
   context.system.scheduler.schedule(100.milliseconds, 100.milliseconds, self, RetryPersist)
-  override val supervisorStrategy = OneForOneStrategy(withinTimeRange = 1.second) {
+  override val supervisorStrategy = OneForOneStrategy() {
     case _: PersistenceException => Restart
   }
   val persistence = context.actorOf(persistenceProps)
-  
+
   var kv = Map.empty[String, String]
   var currentPersist: Option[(ActorRef, Persist)] = None
   var expectedSeq = 0
-  
+
   // a map from secondary replicas to replicators
   var secondaries = Map.empty[ActorRef, ActorRef]
   // a map of operation id to sender and replicators with outstanding acks

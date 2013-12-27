@@ -21,7 +21,6 @@ class Persistence(flaky: Boolean) extends Actor with ActorLogging {
     reason match {
       case _: PersistenceException => {
         log.warning(s"restart with message [$message]")
-        self ! message
       }
     }
   }

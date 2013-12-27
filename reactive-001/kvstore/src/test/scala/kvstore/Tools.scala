@@ -10,10 +10,26 @@ import akka.actor.Props
 import akka.testkit.TestKit
 import akka.testkit.ImplicitSender
 import scala.concurrent.duration._
+import scala.util.Random
 
 object Tools {
   class TestRefWrappingActor(val probe: TestProbe) extends Actor {
     def receive = { case msg => probe.ref forward msg }
+  }
+
+  class FlakySecondaryWrappingActor(val target: ActorRef) extends Actor {
+    var source: Option[ActorRef] = None
+
+    def receive = {
+      case msg => {
+        if (sender == target) {
+          source.get ! msg
+        } else {
+          source = Some(sender)
+          if (Random.nextBoolean) target ! msg
+        }
+      }
+    }
   }
 }
 
@@ -28,6 +44,7 @@ trait Tools { this: TestKit with FunSuite with ShouldMatchers with ImplicitSende
   import Tools._
 
   def probeProps(probe: TestProbe): Props = Props(classOf[TestRefWrappingActor], probe)
+  def flakyProps(target: ActorRef): Props = Props(classOf[FlakySecondaryWrappingActor], target)
   
   class Session(val probe: TestProbe, val replica: ActorRef) {
     import Replica._
