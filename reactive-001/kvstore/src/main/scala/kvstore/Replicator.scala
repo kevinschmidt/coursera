@@ -28,7 +28,7 @@ class Replicator(val replica: ActorRef) extends Actor {
   /*
    * The contents of this actor is just a suggestion, you can implement it in any way you like.
    */
-  context.system.scheduler.schedule(100.milliseconds, 100.milliseconds, self, RetryAll)
+  context.system.scheduler.schedule(50.milliseconds, 50.milliseconds, self, RetryAll)
 
   // map from sequence number to pair of sender and request
   var acks = Map.empty[Long, (ActorRef, Replicate)]

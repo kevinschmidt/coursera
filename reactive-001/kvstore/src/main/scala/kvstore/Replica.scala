@@ -40,7 +40,7 @@ class Replica(val arbiter: ActorRef, persistenceProps: Props) extends Actor with
   import Persistence._
   import context.dispatcher
 
-  context.system.scheduler.schedule(100.milliseconds, 100.milliseconds, self, RetryPersist)
+  context.system.scheduler.schedule(10.milliseconds, 10.milliseconds, self, RetryPersist)
   override val supervisorStrategy = OneForOneStrategy() {
     case _: PersistenceException => Restart
   }
@@ -73,11 +73,6 @@ class Replica(val arbiter: ActorRef, persistenceProps: Props) extends Actor with
     case Snapshot(key, valueOption, seq) => processSnapshot(key, valueOption, seq)
     case Persisted(key, seq) => ackSnapshot(key, seq)
     case RetryPersist => retrySnapshot()
-    case Terminated(actor) => {
-      if (actor == persistence) {
-        log.warning("peristence terminated")
-      }
-    }
   }
 
   /* Behavior for  the leader role. */
@@ -99,12 +94,13 @@ class Replica(val arbiter: ActorRef, persistenceProps: Props) extends Actor with
 
   private[this] def processSnapshot(key: String, valueOption: Option[String], seq: Long) {
     seq.compare(expectedSeq) match {
-      case cmp if cmp > 0 => log.warning(s"ignoring future sequence number [req/exc]: [$seq/$expectedSeq]")
+      case cmp if cmp > 0 => log.warning(s"ignoring future sequence number [req/exc]: [$seq/$expectedSeq] [$key:$valueOption]")
       case cmp if cmp < 0 => {
-        log.warning(s"ignoring outdated sequence number [req/exc]: [$seq/$expectedSeq]")
+        log.warning(s"ignoring outdated sequence number [req/exc]: [$seq/$expectedSeq] [$key:$valueOption]")
         sender ! SnapshotAck(key, seq)
       }
       case _ => {
+        log.info(s"processing [$seq] [$key:$valueOption]")
         valueOption match {
           case Some(value) => kv += (key -> value)
           case None => kv -= key
@@ -115,8 +111,8 @@ class Replica(val arbiter: ActorRef, persistenceProps: Props) extends Actor with
   }
 
   private[this] def ackSnapshot(key: String, seq: Long) {
-    expectedSeq += 1
     currentPersist.foreach { persist =>
+      expectedSeq += 1
       persist._1 ! SnapshotAck(key, seq)
     }
     currentPersist = None
@@ -128,8 +124,8 @@ class Replica(val arbiter: ActorRef, persistenceProps: Props) extends Actor with
     }
   }
 
-  private[this] def persistValue(requester: ActorRef, key: String, valueOption: Option[String], id: Long) {
-    val persist = Persist(key, valueOption, id)
+  private[this] def persistValue(requester: ActorRef, key: String, valueOption: Option[String], seq: Long) {
+    val persist = Persist(key, valueOption, seq)
     currentPersist = Some((sender, persist))
     persistence ! persist
   }
