@@ -14,15 +14,54 @@ object Main {
   /**
    * Exercise 1
    */
-  def pascal(c: Int, r: Int): Int = ???
+  def pascal(c: Int, r: Int): Int = {
+    if (c == 0 || r == 0) {
+      1
+    } else {
+      if (c >= r) {
+        1
+      } else {
+        pascal(c-1, r-1) + pascal(c, r-1)
+      }
+    }
+  }
 
   /**
    * Exercise 2
    */
-  def balance(chars: List[Char]): Boolean = ???
+  def balance(chars: List[Char]): Boolean = {
+    def count(chars: List[Char], open: Int): Int = {
+      if (open < 0) {
+        open
+      } else {
+        chars match {
+          case Nil => open
+          case head :: tail => head match {
+            case '(' => count(tail, open+1)
+            case ')' => count(tail, open-1)
+            case _ => count(tail, open)
+          }
+        }
+      }
+    }
+    count(chars, 0) == 0
+  }
 
   /**
    * Exercise 3
    */
-  def countChange(money: Int, coins: List[Int]): Int = ???
+  def countChange(money: Int, coins: List[Int]): Int = {
+    if (money == 0) {
+      1
+    } else {
+      if (money < 0) {
+        0
+      } else {
+	    coins match {
+	      case Nil => 0
+	      case head :: tail => countChange(money - head, coins) + countChange(money, tail)
+	    }
+      }
+    }
+  }
 }
