@@ -86,7 +86,7 @@ class FunSetSuite extends FunSuite {
    * Once you finish your implementation of "singletonSet", exchange the
    * function "ignore" by "test".
    */
-  ignore("singletonSet(1) contains 1") {
+  test("singletonSet(1) contains 1") {
     
     /**
      * We create a new instance of the "TestSets" trait, this gives us access
@@ -101,12 +101,75 @@ class FunSetSuite extends FunSuite {
     }
   }
 
-  ignore("union contains all elements") {
+  test("union contains all elements") {
     new TestSets {
       val s = union(s1, s2)
       assert(contains(s, 1), "Union 1")
       assert(contains(s, 2), "Union 2")
       assert(!contains(s, 3), "Union 3")
+    }
+  }
+  
+  test("intersection contains common elements") {
+    new TestSets {
+      val s = union(s1, s2)
+      val t = union(s2, s3)
+      val d = intersect(s, t)
+      assert(!contains(d, 1), "Intersect 1")
+      assert(contains(d, 2), "Intersect 2")
+      assert(!contains(d, 3), "Intersect 3")
+    }
+  }
+  
+  test("difference contains elements only in first set") {
+    new TestSets {
+      val s = union(s1, s2)
+      val t = union(s2, s3)
+      val d = diff(s, t)
+      assert(contains(d, 1), "Diff 1")
+      assert(!contains(d, 2), "Diff 2")
+      assert(!contains(d, 3), "Diff 3")
+    }
+  }
+
+  test("filter works") {
+    new TestSets {
+      val s = union(union(s1, s2), s3)
+      val p = filter(s, i => i > 1)
+      assert(!contains(p, 1), "Filter 1")
+      assert(contains(p, 2), "Filter 2")
+      assert(contains(p, 3), "Filter 3")
+    }
+  }
+  
+  test("forall works") {
+    new TestSets {
+      val s = union(union(s1, s2), s3)
+      assert(forall(s, i => i > 0), "Forall 1")
+      assert(!forall(s, i => i < 3), "Forall 2")
+      assert(!forall(s, i => i == 5), "Forall 3")
+    }
+  }
+  
+  test("exists works") {
+    new TestSets {
+      val s = union(union(s1, s2), s3)
+      assert(exists(s, i => i > 0), "Exists 1")
+      assert(exists(s, i => i < 3), "Exists 2")
+      assert(!exists(s, i => i == 5), "Exists 3")
+    }
+  }
+  
+  test("map works") {
+    new TestSets {
+      val s = union(union(s1, s2), s3)
+      val m = map(s, i => i + 10)
+      assert(!contains(m, 1), "Map 1")
+      assert(!contains(m, 2), "Map 2")
+      assert(!contains(m, 3), "Map 3")
+      assert(contains(m, 11), "Map 4")
+      assert(contains(m, 12), "Map 5")
+      assert(contains(m, 13), "Map 6")
     }
   }
 }
