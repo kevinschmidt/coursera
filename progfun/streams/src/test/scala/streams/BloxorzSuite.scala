@@ -44,12 +44,48 @@ class BloxorzSuite extends FunSuite {
     new Level1 {
       assert(terrain(Pos(0,0)), "0,0")
       assert(!terrain(Pos(4,11)), "4,11")
+      assert(!terrain(Pos(4,1)), "4,1")
+      assert(!terrain(Pos(0,3)), "0,3")
+      assert(terrain(Pos(5,8)), "5,8")
+      assert(!terrain(Pos(5,9)), "5,9")
     }
   }
 
   test("findChar level 1") {
     new Level1 {
       assert(startPos == Pos(1,1))
+    }
+  }
+
+  test("neighborsWithHistory level 1") {
+    new Level1 {
+      assert(neighborsWithHistory(Block(Pos(1,1),Pos(1,1)), List(Left,Up)).toSet ==Set(
+        (Block(Pos(1,2),Pos(1,3)), List(Right,Left,Up)),
+        (Block(Pos(2,1),Pos(3,1)), List(Down,Left,Up))
+      ))
+    }
+  }
+
+  test("neighborsWithHistory level 1 - second test") {
+    new Level1 {
+      assert(neighborsWithHistory(Block(Pos(2,1),Pos(3,1)), List(Down)).toSet ==Set(
+        (Block(Pos(2,2),Pos(3,2)), List(Right,Down)),
+        (Block(Pos(1,1),Pos(1,1)), List(Up,Down))
+      ))
+    }
+  }
+
+  test("newNeighborsOnly level 1") {
+    new Level1 {
+      assert(newNeighborsOnly(
+        Set(
+          (Block(Pos(1,2),Pos(1,3)), List(Right,Left,Up)),
+          (Block(Pos(2,1),Pos(3,1)), List(Down,Left,Up))
+        ).toStream,
+        Set(Block(Pos(1,2),Pos(1,3)), Block(Pos(1,1),Pos(1,1)))
+      ) == Set(
+        (Block(Pos(2,1),Pos(3,1)), List(Down,Left,Up))
+      ).toStream)
     }
   }
 
@@ -62,6 +98,21 @@ class BloxorzSuite extends FunSuite {
   test("optimal solution length for level 1") {
     new Level1 {
       assert(solution.length == optsolution.length)
+    }
+  }
+
+  trait LevelBad extends SolutionChecker {
+    val level =
+      """------
+        |--So--
+        |--oo--
+        |--oT--
+        |------""".stripMargin
+  }
+
+  test("solution length when no solution is possible") {
+    new LevelBad {
+      assert(solution.length == 0)
     }
   }
 }
