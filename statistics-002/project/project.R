@@ -1,3 +1,5 @@
+download.file(url = "http://bit.ly/dasi_project_template", destfile = "dasi_project_template.Rmd")
+
 load(url("http://bit.ly/dasi_gss_data"))
 names(gss)
 summary(gss$coninc)
