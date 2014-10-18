@@ -1,31 +1,80 @@
 ---
-title: "project title"
-date: "date"
+title: Are different marital statuses and family income correlated in the United States of America?
 output:
   html_document:
     theme: cerulean
+date: '2014-10-15'
 ---
 
 <!-- For more info on RMarkdown see http://rmarkdown.rstudio.com/ -->
 
 <!-- Enter the code required to load your data in the space below. The data will be loaded but the line of code won't show up in your write up (echo=FALSE) in order to save space-->
 ```{r echo=FALSE}
-
+options(width=160)
+load(url("http://bit.ly/dasi_gss_data"))
 ```
 
 <!-- In the remainder of the document, add R code chunks as needed -->
 
 ### Introduction:
 
-Insert introduction here...
+The research question for this analysis looks at the correlation between martial status (Married, Widowed, Divorced, Separated, or Never Married) and family income within the United States of America. A common assumption is that a stable marriage has economic benefits for both partners. Another common assumption is that more hight income adults have a higher marriage rate. A coorelation would be an indicator that either of those assumption could be true even if causality cannot be established.
 
 ### Data:
 
-Insert data section here...
+The data for this analysis comes from in-person interviews conducted by the National Opinion Research Center at the University of Chicago, of adult residents of the USA. Each case represents the answers of a randomly selected adult. There are 57061 cases in the dataset.
+
+The variables if interest from the data set are "coninc", a numerical continuous variable representing the family income in constant dollars, and "marital", a categorical (not ordinal) variable representing the marital status with values Married, Widowed, Divorced, Separated, or Never Married.
+
+This is an observational study as the data is from a survey of adults selected from families across the whole United States. Therefore the population of interest are the residents of the United States of America. The study is based on stratified random sampling collected every other year from 1972 to 2012. The strata changed over time but geographical strata were usually included. Special effort was taken to avoid non-responsive bias by calling selected participants outside of working hours and on weekends. There is still the possibility of selection bias as the sample size is small with a mean of 2853 cases per year and participants are required to participate in an in-person interview. In general the sample can be considered generalizable. As the data comes from an observational study causality cannot be established between the variables only correlation.
 
 ### Exploratory data analysis:
 
-Insert exploratory data analysis here...
+```{r echo=FALSE}
+gssredux <- subset(gss, gss$coninc !='NA' & gss$marital !='NA')
+gssredux <- gssredux[c("coninc", "marital")]
+
+marital_merged <- as.character(gssredux$marital)
+marital_merged[marital_merged %in% c('Widowed', 'Divorced', 'Separated', 'Never Married')] <- "Not Married"
+marital_merged <- as.factor(marital_merged)
+marital_merged <- droplevels(marital_merged)
+gssredux$marital_merged <- marital_merged
+```
+
+* Summary of the variable family income in the GSS data set
+```{r echo=FALSE}
+summary(gssredux$coninc)
+```
+* Summary of the variable marital status in the GSS data set
+```{r echo=FALSE}
+summary(gssredux$marital)
+```
+
+* Histogram for variable family income
+
+```{r echo=FALSE}
+hist(gssredux$coninc, main=NULL, xlab="Family Income")
+```
+
+* Histogram for variable marital status
+
+```{r echo=FALSE}
+barplot(summary(gssredux$marital), xlab="Marital Status", ylab="Frequency")
+```
+
+* Histogram for variable combined marital status (married vs non-married)
+
+```{r echo=FALSE}
+barplot(summary(gssredux$marital_merged), xlab="Marital Status", ylab="Frequency")
+```
+
+* Boxplot for both variables, family income and combined martial status
+
+```{r echo=FALSE}
+plot(gssredux$marital_merged, gssredux$coninc, xlab="Marital Status", ylab="Family Income")
+```
+
+Explanatory analysis suggest that there is a large enough amount of cases for each martial status to allow for testing. Family income distribution is right skewed and uni-modal. The box plot suggests a correlation but the married status might be misleading as the income for married adults includes the spouse's income.
 
 ### Inference:
 
