@@ -101,9 +101,9 @@ $H_{A}: \mu_{Married}-\mu_{NotMarried}\neq0$
 
 #### Inference Method
 
-The confidence interval calculation and hypotheses test will be performed using the central limit theorem for comparing independent means. We can use this method because the response variable (family income) is numeric, the explanatory variable is a categorical variable with only 2 levels (Married and Not Married) and the two groups can be assumed to not be paired.
+The confidence interval calculation and hypotheses test will be performed using the central limit theorem (CLT) for comparing independent means. This method can be used because the response variable (family income) is numeric and nearly normal distributed, the explanatory variable is a categorical variable with only 2 levels (Married and Not Married) and the two groups (levels) can be assumed to not be paired. The CLT calculation is based on a nearly normal sampling distribution centered around the point estimate.
 
-The point estimate is calculated as a difference between the means, the standard error using the method for independent means $SE_{(\bar{x}_1-\bar{x}_2)}=\sqrt{s_1^2/n_1+s_2^2/n_2}$, followed by the z- and p-values as well as the confidence interval for 95% per standard CLT. If the p value is below the $\alpha$ of 5% we reject the null hypotheses.
+The point estimate is calculated as a difference between the means $\bar{x}_1-\bar{x}_2$, the standard error using the method for independent means $SE_{(\bar{x}_1-\bar{x}_2)}=\sqrt{s_1^2/n_1+s_2^2/n_2}$, followed by the z- and p-values as well as the confidence interval for 95% per standard CLT. If the p value is below the $\alpha$ of 5% we reject the null hypotheses.
 
 #### Perform Inference
 ```{r}
@@ -121,4 +121,15 @@ As a p-value of `r p` is below the $\alpha$ of 5% we reject the null hypotheses.
 
 ### Conclusion:
 
-Based on the data it was demonstrated that there is a clear difference in average income between individuals who are married and not married in the United States of America. We cannot establish a causation but a clear correlation is shown. A further analysis is needed to control for work status (working or non-working) of subject and subject's spouse for married individuals, to see if double income is strongly influencing the result.
+Based on the data it was demonstrated with resonable confidence that there is a clear difference in average income between individuals who are married and not married in the United States of America. We cannot establish a causation, if higher income or maritial status are the determining factor, but a correlation is shown. A further analysis is needed to control for work status (working or non-working) of the subject and the subject's spouse for married individuals, to see if double income is strongly influencing the result.
+
+### References:
+
+Smith, Tom W., Michael Hout, and Peter V. Marsden. General Social Survey, 1972-2012 [Cumulative File]. ICPSR34802-v1. Storrs, CT: Roper Center for Public Opinion Research, University of Connecticut /Ann Arbor, MI: Inter-university Consortium for Political and Social Research [distributors], 2013-09-11. Coursera Extract.
+URL: http://bit.ly/dasi_gss_data
+
+### Appendix - Data Extract:
+
+```{r echo=FALSE}
+head(gssredux, n=50)
+```
