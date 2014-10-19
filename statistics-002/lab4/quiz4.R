@@ -6,8 +6,8 @@ low90 <- mean + (z90*se)
 high90 <- mean - (z90*se)
 low95 <- mean + (z95*se)
 high95 <- mean - (z95*se)
-z <- (mean - 0) / se
-2*pnorm(z)
+z <- (abs(mean) - 0) / se
+2*pnorm(-z)
 
 t <- 2.485
 n <- 26

@@ -1,8 +1,10 @@
 ---
-title: Are different marital statuses and family income correlated in the United States of America?
+title: Are different marital statuses and family income correlated in the United States
+  of America?
 output:
   html_document:
     theme: cerulean
+  pdf_document: default
 date: '2014-10-15'
 ---
 
@@ -10,8 +12,9 @@ date: '2014-10-15'
 
 <!-- Enter the code required to load your data in the space below. The data will be loaded but the line of code won't show up in your write up (echo=FALSE) in order to save space-->
 ```{r echo=FALSE}
-options(width=160)
-load(url("http://bit.ly/dasi_gss_data"))
+options(width=160, scipen=100, digits=3)
+#load(url("http://bit.ly/dasi_gss_data"))
+load("statistics_project_gss.Rdata")
 ```
 
 <!-- In the remainder of the document, add R code chunks as needed -->
@@ -22,7 +25,7 @@ The research question for this analysis looks at the correlation between martial
 
 ### Data:
 
-The data for this analysis comes from in-person interviews conducted by the National Opinion Research Center at the University of Chicago, of adult residents of the USA. Each case represents the answers of a randomly selected adult. There are 57061 cases in the dataset.
+The data (GSS) for this analysis comes from in-person interviews conducted by the National Opinion Research Center at the University of Chicago, of adult residents of the USA. Each case represents the answers of a randomly selected adult. There are 57061 cases in the dataset.
 
 The variables if interest from the data set are "coninc", a numerical continuous variable representing the family income in constant dollars, and "marital", a categorical (not ordinal) variable representing the marital status with values Married, Widowed, Divorced, Separated, or Never Married.
 
@@ -39,6 +42,9 @@ marital_merged[marital_merged %in% c('Widowed', 'Divorced', 'Separated', 'Never 
 marital_merged <- as.factor(marital_merged)
 marital_merged <- droplevels(marital_merged)
 gssredux$marital_merged <- marital_merged
+
+married <- gssredux[gssredux$marital_merged == 'Married',]
+notmarried <- gssredux[gssredux$marital_merged == 'Not Married',]
 ```
 
 * Summary of the variable family income in the GSS data set
@@ -54,6 +60,7 @@ summary(gssredux$marital)
 
 ```{r echo=FALSE}
 hist(gssredux$coninc, main=NULL, xlab="Family Income")
+length(unique(gssredux$year))
 ```
 
 * Histogram for variable marital status
@@ -61,6 +68,14 @@ hist(gssredux$coninc, main=NULL, xlab="Family Income")
 ```{r echo=FALSE}
 barplot(summary(gssredux$marital), xlab="Marital Status", ylab="Frequency")
 ```
+
+* Boxplot for both variables, family income and martial status
+
+```{r echo=FALSE}
+plot(gssredux$marital, gssredux$coninc, xlab="Marital Status", ylab="Family Income")
+```
+
+As there a lot of responses for Married relative to the other ones it makes sense to combine the other marital statuses into one call Not Married and explore this data further.
 
 * Histogram for variable combined marital status (married vs non-married)
 
@@ -74,12 +89,45 @@ barplot(summary(gssredux$marital_merged), xlab="Marital Status", ylab="Frequency
 plot(gssredux$marital_merged, gssredux$coninc, xlab="Marital Status", ylab="Family Income")
 ```
 
-Explanatory analysis suggest that there is a large enough amount of cases for each martial status to allow for testing. Family income distribution is right skewed and uni-modal. The box plot suggests a correlation but the married status might be misleading as the income for married adults includes the spouse's income.
+Explanatory analysis suggest that there is a large enough amount of cases for each martial status to allow for testing. Family income distribution is right skewed and uni-modal. The box plot suggests a correlation between the status Married and income. This is even more apparent when the other marital statuses are merged together.
 
 ### Inference:
 
-Insert inference section here...
+#### Hypotheses
+
+__Null Hypotheses__: no difference between the mean of family income of married and not married cases $H_{0}: \mu_{Married}-\mu_{NotMarried}=0$
+
+__Alternative Hypotheses__: some difference between the mean of family income of married and not married cases $H_{A}: \mu_{Married}-\mu_{NotMarried}\neq0$
+
+#### Conditions
+* Independence
+    * within groups Married and Not Married
+        * random sampling is used for all cases in the GSS
+        * 51225 cases is less than < 10% of the population 
+    * between groups Married and Not Married
+        * Married and Not Married are not paired
+* Sample size and skew
+    * Married is 27931 cases, Not Married is 23294 cases which is more than 30
+    * the relatively large sample should also compensate for the skew in the population 
+
+#### Inference Method
+
+The confidence interval calculation and hyposese test will be performed using the central limit theorem for comparing independent means. We can use this method because the response variable (family income) is numeric, the explanatory variable is a categorical variable with only 2 levels (Married and Not Married) and the two groups can be assumed to not be paired. The point estimate is calculated as a difference between the means, the standard error using the method for independent means $SE_{(\bar{x}_1-\bar{x}_2)}=\sqrt{s_1^2/n_1+s_2^2/n_2}$, followed by the z- and p-values as well as the confidence interval for 95% per standard CLT. If the p value is below the $\alpha$ of 5% we reject the null hypotheses.
+
+#### Perform Inference
+```{r}
+pe <- mean(married$coninc) - mean(notmarried$coninc)
+se = sqrt(sd(married$coninc)^2/length(married$coninc) + sd(notmarried$coninc)^2/length(notmarried$coninc))
+z <- (abs(pe) - 0) / se
+z95 <- abs(qnorm(0.025))
+ci <- c(pe - (z95*se), pe + (z95*se))
+p <- 2*pnorm(z, lower.tail = FALSE)
+```
+Point estimate (difference between means) is `r pe` with a standard error of `r se`. This results in a 95% confidence interval of (`r ci`) and a p-value of `r p`. As p is below 5% we reject the null hypotheses.
+
+#### Interpret Results
+As a p-value of `r p` is below the $\alpha$ of 5% we reject the null hypotheses. If there is no difference between the mean family income by married and not married persons, there is a `r p`% chance of obtaining random samples of `r length(married$coninc)` married and `r length(notmarried$coninc)` not married perons where the average difference between family income is at least `r pe`$. The 0 difference value of the null hypotheses is also not within (`r ci`) the 95% confidence interval so both methods agree.
 
 ### Conclusion:
 
-Insert conclusion here...
+Based on the data it was demonstrated that there is a clear difference in average income between people who are married and not married. We cannot establish a causation but a clear correlation is shown. A further analysis is needed to control for work status (working or non-working) of subject and subject spouse in married people, to see if double income is strongly influencing the result.
